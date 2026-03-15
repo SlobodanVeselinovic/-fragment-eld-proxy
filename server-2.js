@@ -1,39 +1,3 @@
-// ════════════════════════════════════════════════════
-//  Fragment Logistics — Optima ELD Cloud Proxy
-//  Deploy free on Render.com
-// ════════════════════════════════════════════════════
-
-const express = require('express');
-const fetch = require('node-fetch');
-const app = express();
-const PORT = process.env.PORT || 3000;
-const OPTIMA_BASE = 'https://web.optimaeld.com';
-
-// ── CORS — allow all origins ─────────────────────────
-app.use((req, res, next) => {
-  res.header('Access-Control-Allow-Origin', '*');
-  res.header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-  res.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Api-Key, X-API-Key');
-  if (req.method === 'OPTIONS') return res.sendStatus(200);
-  next();
-});
-app.use(express.json());
-
-// ── Health check ─────────────────────────────────────
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok', service: 'Fragment Logistics ELD Proxy', time: new Date().toISOString() });
-});
-
-// ── Generic proxy — forwards ANY /api/v0/* to Optima ─
-app.get('/api/v0/*', async (req, res) => {
-  const apiKey = req.headers['x-api-key'] || req.headers['x-Api-Key'] || '';
-  const path = req.originalUrl; // keeps query string intact
-  const url = OPTIMA_BASE + path;
-
-  console.log(`Proxying: GET ${url}`);
-
-  try {
-    const r = await fetch(url, {
       headers: {
         'X-Api-Key': apiKey,
         'Content-Type': 'application/json',
